@@ -1,5 +1,4 @@
-﻿// Data/SeedData.cs
-using LibraryManagement.Models;
+﻿using LibraryManagement.Models;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Threading.Tasks;
@@ -10,7 +9,7 @@ namespace LibraryManagement.Data
     {
         public static async Task InitializeAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Đảm bảo các role tồn tại
+            // Tạo các roles nếu chưa tồn tại
             string[] roleNames = { "Admin", "Librarian", "Member" };
             foreach (var roleName in roleNames)
             {
@@ -21,55 +20,51 @@ namespace LibraryManagement.Data
                 }
             }
 
-            // Tạo Admin nếu chưa tồn tại
+            // Tạo tài khoản Admin nếu chưa tồn tại
             var adminEmail = "admin@library.com";
-            var admin = await userManager.FindByEmailAsync(adminEmail);
-            
-            if (admin == null)
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
             {
-                var adminUser = new ApplicationUser
+                var admin = new ApplicationUser
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    EmailConfirmed = true,
-                    FirstName = "System",
-                    LastName = "Administrator",
-                    Address = "Library Address",
+                    FirstName = "Admin",
+                    LastName = "User",
+                    Address = "Library HQ",
                     DateOfBirth = new DateTime(1990, 1, 1),
-                    MemberSince = DateTime.Now
+                    MemberSince = DateTime.Now,
+                    EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(adminUser, "Admin@123");
-                
+                var result = await userManager.CreateAsync(admin, "Admin@123");
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    await userManager.AddToRoleAsync(admin, "Admin");
                 }
             }
 
-            // Tạo một Librarian mẫu
+            // Tạo tài khoản Librarian nếu chưa tồn tại
             var librarianEmail = "librarian@library.com";
-            var librarian = await userManager.FindByEmailAsync(librarianEmail);
-            
-            if (librarian == null)
+            var librarianUser = await userManager.FindByEmailAsync(librarianEmail);
+            if (librarianUser == null)
             {
-                var librarianUser = new ApplicationUser
+                var librarian = new ApplicationUser
                 {
                     UserName = librarianEmail,
                     Email = librarianEmail,
-                    EmailConfirmed = true,
-                    FirstName = "Library",
-                    LastName = "Staff",
-                    Address = "Library Address",
-                    DateOfBirth = new DateTime(1995, 5, 15),
-                    MemberSince = DateTime.Now
+                    FirstName = "Librarian",
+                    LastName = "User",
+                    Address = "Library HQ",
+                    DateOfBirth = new DateTime(1995, 5, 5),
+                    MemberSince = DateTime.Now,
+                    EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(librarianUser, "Librarian@123");
-                
+                var result = await userManager.CreateAsync(librarian, "Librarian@123");
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(librarianUser, "Librarian");
+                    await userManager.AddToRoleAsync(librarian, "Librarian");
                 }
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace LibraryManagement.Models.ViewModels.Book
 {
@@ -10,8 +11,7 @@ namespace LibraryManagement.Models.ViewModels.Book
         [Display(Name = "Tiêu đề")]
         public string Title { get; set; }
 
-        [Display(Name = "ISBN")]
-        public string ISBN { get; set; }
+        [Display(Name = "ISBN")] public string ISBN { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập năm xuất bản")]
         [Display(Name = "Năm xuất bản")]
@@ -28,15 +28,5 @@ namespace LibraryManagement.Models.ViewModels.Book
         [Display(Name = "Ảnh bìa")] public IFormFile CoverImage { get; set; }
 
         public string ExistingCoverImageUrl { get; set; }
-
-        [Required(ErrorMessage = "Vui lòng chọn thể loại")]
-        [Display(Name = "Thể loại")]
-        public int CategoryId { get; set; }
-
-        [Required(ErrorMessage = "Vui lòng chọn tác giả")]
-        [Display(Name = "Tác giả")]
-        public int AuthorId { get; set; }
-
-      
     }
 }
