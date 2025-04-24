@@ -1,11 +1,11 @@
 ﻿using LibraryManagement.Data;
 using LibraryManagement.Models;
 using LibraryManagement.Models.ViewModels;
+using LibraryManagement.Services.Implement;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using LibraryManagement.Services.Implement;
 
 namespace LibraryManagement.Services
 {
@@ -40,6 +40,9 @@ namespace LibraryManagement.Services
 
         public List<BookBorrowViewModel> GetUserBorrows(string userId)
         {
+            if (string.IsNullOrEmpty(userId))
+                throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
+
             return _context.BookBorrows
                 .Include(b => b.Book)
                 .Include(b => b.User)
@@ -61,6 +64,9 @@ namespace LibraryManagement.Services
 
         public BookBorrowViewModel GetBorrowById(int id)
         {
+            if (id <= 0)
+                throw new ArgumentException("Invalid borrow ID", nameof(id));
+
             return _context.BookBorrows
                 .Include(b => b.Book)
                 .Include(b => b.User)
@@ -82,15 +88,39 @@ namespace LibraryManagement.Services
 
         public void ReturnBook(int borrowId)
         {
-            var borrow = _context.BookBorrows.Find(borrowId);
-            if (borrow != null && !borrow.ReturnDate.HasValue)
+            if (borrowId <= 0)
+                throw new ArgumentException("Invalid borrow ID", nameof(borrowId));
+
+            using (var transaction = _context.Database.BeginTransaction())
             {
-                borrow.ReturnDate = DateTime.Now;
-                _context.SaveChanges();
-            }
-            else
-            {
-                throw new InvalidOperationException("Phiếu mượn không hợp lệ hoặc sách đã được trả");
+                try
+                {
+                    var borrow = _context.BookBorrows.Find(borrowId);
+                    if (borrow == null)
+                        throw new InvalidOperationException($"Borrow record with ID {borrowId} not found");
+
+                    if (borrow.ReturnDate.HasValue)
+                        throw new InvalidOperationException("This book has already been returned");
+
+                    borrow.ReturnDate = DateTime.Now;
+                    _context.SaveChanges();
+
+                    // Check if there are any active reservations for this book
+                    var activeReservations = _context.Reservations
+                        .Where(r => r.BookId == borrow.BookId && r.IsActive)
+                        .OrderBy(r => r.ReservationDate)
+                        .ToList();
+
+                    // If needed, you could implement notification logic here
+                    // for the first person in the reservation queue
+
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
         }
     }

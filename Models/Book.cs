@@ -36,22 +36,6 @@ namespace LibraryManagement.Models
         public virtual ICollection<BookBorrow> BookBorrows { get; set; }
         public virtual ICollection<Reservation> Reservations { get; set; }
         
-        // Calculated property
-        public int AvailableCopies 
-        { 
-            get 
-            {
-                if (BookBorrows == null) return CopiesOwned;
-                int borrowedCopies = 0;
-                foreach (var borrow in BookBorrows)
-                {
-                    if (borrow.ReturnDate == null)
-                    {
-                        borrowedCopies++;
-                    }
-                }
-                return CopiesOwned - borrowedCopies;
-            } 
-        }
+        public int AvailableCopies { get; set; }
     }
 }
